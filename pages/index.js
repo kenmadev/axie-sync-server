@@ -134,7 +134,7 @@ const Home = () => {
                     <div className='flex flex-wrap items-center'>
                       <div>
                         <p className='text-sm'>
-                          It doesn't matter if you use the{' '}
+                          It doesn&apos;t matter if you use the{' '}
                           <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-blue-600 bg-blue-200 last:mr-0 mr-1'>
                             ronin:
                           </span>{' '}

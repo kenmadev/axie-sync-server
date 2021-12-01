@@ -1,7 +1,98 @@
 import Head from 'next/head';
 import styled from 'styled-components';
+import { useState, useCallback } from 'react';
+import { isValidRonin, useAxios } from '../helpers/utils';
+import moment from 'moment';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
 
 const Home = () => {
+  const [ronin, setRonin] = useState('');
+  const [battles, setBattles] = useState([]);
+  const [requested, setRequested] = useState(false);
+  const [error, setError] = useState('');
+
+  const onRoninChange = e => {
+    const theRonin = e.target.value;
+    setRonin(theRonin.replace('ronin:', '0x'));
+    if (!isEqual(theRonin, ronin)) {
+      setBattles([]);
+      setRequested(false);
+    }
+
+    setError('');
+    e.preventDefault();
+  };
+
+  const getBattles = async () => {
+    const { data: result } = await useAxios().get(`/api/battles/${ronin}`);
+    if (!isEmpty(result)) {
+      setBattles(result);
+      setRequested(true);
+    } else {
+      setError('Empty results');
+    }
+  };
+
+  const onSearch = useCallback(() => {
+    try {
+      if (!isValidRonin(ronin)) {
+        return setError('The provided ronin address is invalid');
+      }
+
+      getBattles();
+    } catch (err) {
+      console.log(err);
+      setError(err.message);
+    }
+  });
+
+  const renderBattles = () => {
+    if (!isEmpty(error)) {
+      return <ErrorBox className='text-white p-5'>{error}</ErrorBox>;
+    }
+
+    return (
+      <Battles className=''>
+        {battles.map((battle, index) => {
+          const clients = [battle.firstClientId, battle.secondClientId];
+          const winnerClient = clients[battle.winner];
+          const isRoninWinner = isEqual(winnerClient, ronin);
+          const date = moment(battle.createdAt).format(
+            'MMM DD YYYY, h:mm:ss a'
+          );
+          const wonResut = isRoninWinner ? renderWon() : renderLose();
+          return (
+            <Battle
+              className='mb-2 text-white flex items-start justify-between'
+              key={`battle-${index}`}
+            >
+              <div className='m-5'>
+                <div className='text-left'>
+                  <a href={`axie://${battle.uuid}`}>{battle.uuid}</a>
+                </div>
+                <div className='text-sm text-left text-gray-400'>{date}</div>
+              </div>
+              <div className='m-5'>{wonResut}</div>
+            </Battle>
+          );
+        })}
+      </Battles>
+    );
+  };
+
+  const renderWon = () => (
+    <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-green-600 bg-green-200 last:mr-0 mr-1'>
+      Won
+    </span>
+  );
+
+  const renderLose = () => (
+    <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-red-600 bg-red-200 last:mr-0 mr-1'>
+      Lose
+    </span>
+  );
+
   return (
     <Wrapper className='dark'>
       <div className='flex flex-col items-center justify-center  min-h-screen py-2'>
@@ -13,8 +104,7 @@ const Home = () => {
           <div>
             <div className='pt-14 mx-2 md:mx-0  pb-16 px-5 md:px-10 mb-6 rounded-lg'>
               <h1 className='text-gray-50 text-4xl md:text-5xl font-bold'>
-                Axie Battle{' '}
-                <span className='text-blue-600 dark:text-blue-500'>Search</span>
+                Axie Battle <span className='text-blue-600'>Search</span>
               </h1>
 
               <div className='flex items-center flex-row justify-center'>
@@ -30,6 +120,7 @@ const Home = () => {
                         Ronin Address
                       </label>
                       <input
+                        onChange={onRoninChange}
                         className='w-full h-10 pl-3 pr-8 py-6 text-base placeholder-gray-600 border rounded-sm focus:shadow-outline'
                         type='text'
                         placeholder='Enter Ronin Address'
@@ -37,18 +128,18 @@ const Home = () => {
                     </div>
                   </div>
                   <div
-                    className='mx-1 md:mx-0 bg-gray-800 rounded-b text-gray-50 px-4 py-4 text-left my-2 dark:text-gray-300 dark:border-gray-500'
+                    className='mx-1 md:mx-0 bg-gray-800 rounded-b text-gray-50 px-4 py-4 text-left my-2'
                     role='alert'
                   >
                     <div className='flex flex-wrap items-center'>
                       <div>
                         <p className='text-sm'>
                           It doesn't matter if you use the{' '}
-                          <span class='text-sm font-semibold inline-block py-0 px-1 rounded text-blue-600 bg-blue-200 last:mr-0 mr-1'>
+                          <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-blue-600 bg-blue-200 last:mr-0 mr-1'>
                             ronin:
                           </span>{' '}
                           or{' '}
-                          <span class='text-sm font-semibold inline-block py-0 px-1 rounded text-blue-600 bg-blue-200 last:mr-0 mr-1'>
+                          <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-blue-600 bg-blue-200 last:mr-0 mr-1'>
                             0x
                           </span>{' '}
                           prefix on the address, they both return the same
@@ -59,12 +150,17 @@ const Home = () => {
                   </div>
 
                   <div className='flex flex-col items-right mt-6 sm:w-full'>
-                    <button className='flex-shrink-0 bg-blue-600 text-white text-base font-semibold py-3 px-3 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-blue-200'>
+                    <button
+                      onClick={onSearch}
+                      className='flex-shrink-0 bg-blue-600 text-white text-base font-semibold py-3 px-3 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-blue-200'
+                    >
                       Search Battle History
                     </button>
                   </div>
                 </div>
               </div>
+
+              <div className='pt-10 '>{renderBattles()}</div>
             </div>
           </div>
         </MainList>
@@ -90,6 +186,20 @@ const Wrapper = styled.div`
 
 const MainList = styled.main`
   width: 820px;
+`;
+
+const Battles = styled.div``;
+
+const Battle = styled.div`
+  background-color: #282b39;
+
+  a:hover {
+    text-decoration: underline;
+  }
+`;
+
+const ErrorBox = styled.div`
+  background-color: #282b39;
 `;
 
 export default Home;

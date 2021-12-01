@@ -69,7 +69,7 @@ const Home = () => {
             >
               <div className='m-5'>
                 <div className='text-left'>
-                  <a href={`axie://${battle.uuid}`}>{battle.uuid}</a>
+                  <a href={`axie://f=rpl&q=${battle.uuid}`}>{battle.uuid}</a>
                 </div>
                 <div className='text-sm text-left text-gray-400'>{date}</div>
               </div>

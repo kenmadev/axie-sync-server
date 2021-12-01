@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import styled from 'styled-components';
 import { useState, useCallback } from 'react';
-import { isValidRonin, useAxios } from '../helpers/utils';
+import { isValidRonin, getAxios } from '../helpers/utils';
 import moment from 'moment';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
@@ -25,7 +25,7 @@ const Home = () => {
   };
 
   const getBattles = async () => {
-    const { data: result } = await useAxios().get(`/api/battles/${ronin}`);
+    const { data: result } = await getAxios().get(`/api/battles/${ronin}`);
     if (!isEmpty(result)) {
       setBattles(result);
       setRequested(true);

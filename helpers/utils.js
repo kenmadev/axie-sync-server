@@ -10,7 +10,7 @@ const schemaToDefault = schema => {
   }, {});
 };
 
-const useAxios = (options = {}) => {
+const getAxios = (options = {}) => {
   const instance = axios.create({
     timeout: 60000,
     ...options,
@@ -39,6 +39,6 @@ const isValidRonin = ronin => {
 
 module.exports = {
   schemaToDefault,
-  useAxios,
+  getAxios,
   isValidRonin,
 };

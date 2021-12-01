@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import styled from 'styled-components';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { isValidRonin, getAxios } from '../helpers/utils';
 import moment from 'moment';
 import isEmpty from 'lodash/isEmpty';
@@ -34,7 +34,7 @@ const Home = () => {
     }
   };
 
-  const onSearch = useCallback(() => {
+  const onSearch = () => {
     try {
       if (!isValidRonin(ronin)) {
         return setError('The provided ronin address is invalid');
@@ -45,7 +45,7 @@ const Home = () => {
       console.log(err);
       setError(err.message);
     }
-  });
+  };
 
   const renderBattles = () => {
     if (!isEmpty(error)) {

@@ -83,13 +83,13 @@ const Home = () => {
 
   const renderWon = () => (
     <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-green-600 bg-green-200 last:mr-0 mr-1'>
-      Won
+      Victory
     </span>
   );
 
   const renderLose = () => (
     <span className='text-sm font-semibold inline-block py-0 px-1 rounded text-red-600 bg-red-200 last:mr-0 mr-1'>
-      Lose
+      Defeat
     </span>
   );
 
